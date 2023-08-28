@@ -18,8 +18,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using System.Collections;
 using QuickGraph;
-using GraphSharp;
-
+using Semi_automatic_trace.ViewModels;
 
 namespace Semi_automatic_trace
 {
@@ -28,24 +27,12 @@ namespace Semi_automatic_trace
     /// </summary>
     public partial class Main_Wind : Window
     {
-        Document _doc;
-        UIDocument _uidoc;
-        public Main_Wind(Document doc, UIDocument uidoc)
+
+        public Main_Wind(SATViewModel satViewModel)
         {
-            InitializeComponent();
-            _doc = doc;
-            _uidoc = uidoc;
+            InitializeComponent();          
+            DataContext = satViewModel;
         }
-
-        public void B_Graph(Object sender, EventArgs e)
-        {
-            MEPElements Mep_Elements = new MEPElements();
-            BidirectionalGraph<object, IEdge<object>> graph = Mep_Elements.BuildGraph(_doc, _uidoc);
-            GraphLayout.Graph = graph;
-        }
-        
-
-
 
     }
 }
