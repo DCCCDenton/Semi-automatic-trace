@@ -59,7 +59,8 @@ namespace Semi_automatic_trace.ViewModels
                 return getElectricalSystem ??
                     (getElectricalSystem = new RelayCommand(obj =>
                     {
-                        var tmp = (Reference as FamilyInstance).MEPModel.GetElectricalSystems();
+                        MEPElements mepElements = new();
+                        var tmp = mepElements.GetAllElementOfElectricalSystem(_doc, Reference);
                     }));
             }
         }

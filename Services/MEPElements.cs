@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Electrical;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using QuickGraph;
-
+using Semi_automatic_trace.Data;
 
 namespace Semi_automatic_trace
 {
@@ -110,9 +111,24 @@ namespace Semi_automatic_trace
             return vertex_list;
         }
 
-        public void GetElectricalSystem(Element element)
+        public List<ElectricalSystemElements> GetAllElementOfElectricalSystem(Document doc, Element element)
         {
-            
+            List<ElectricalSystemElements> listOfElementOfElectricalSystem = new();
+            if (element.Category.BuiltInCategory == BuiltInCategory.OST_ElectricalEquipment)
+            {
+                FamilyInstance panelInstance = element as FamilyInstance;
+                ISet<ElectricalSystem> electricalSystems = panelInstance.MEPModel.GetElectricalSystems();
+                foreach (ElectricalSystem electricalSystem in electricalSystems)
+                {
+                    ElectricalSystemElements electricalSystemElements = new () { Panel = element};
+                    foreach (Element elm in electricalSystem.Elements)
+                    {
+                        electricalSystemElements.FeedElectricalElements.Add(elm);   
+                    }
+                    listOfElementOfElectricalSystem.Add(electricalSystemElements);  
+                }
+            }
+            return listOfElementOfElectricalSystem;
         }
     }
 }
