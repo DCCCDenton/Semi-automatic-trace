@@ -84,6 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\ElectricalElement.cs" />
     <Compile Include="Data\ElectricalSystemElements.cs" />
     <Compile Include="Main Class.cs" />
     <Compile Include="Services\RelayCommand.cs" />

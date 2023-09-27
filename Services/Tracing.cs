@@ -13,25 +13,62 @@ namespace Semi_automatic_trace.Services
     internal class Tracing
     {
 
-        public List<Element> TraceRoom(Room room, ElectricalSystemElements electricalSystemElements)
+        public List<ElectricalElement> TraceRoom(Room room, ElectricalSystemElements electricalSystemElements)
         {
-            List<Element> listOfTracingElements = new();
+            List<ElectricalElement> listOfTracingElements = new();
             List<Element> elementInRoom = electricalSystemElements.FeedElectricalElements.Where(e => (e as FamilyInstance).Room.Id == room.Id).ToList();
-            Element firstElement = GetClosestElements(room, elementInRoom, electricalSystemElements.Panel);
-            listOfTracingElements.Add(firstElement);
-            List<Element> removeList = new();
-            removeList.Add(firstElement);   
-            foreach (Element element in elementInRoom)
+            Element firstElement = GetClosestElement(elementInRoom, electricalSystemElements.Panel);
+            ElectricalElement firestElectricalElement = new() { MainElement = firstElement };
+            listOfTracingElements.Add(firestElectricalElement);
+            int i = 1;
+            while (i < elementInRoom.Count)
             {
-                List<Element> newList = RemoveElement(elementInRoom, removeList);
-                foreach (Element elm in newList)
+                Element closesElement = GetClosestElement(elementInRoom, elementInRoom[i]);
+                elementInRoom.Remove(closesElement);
+                List<Element> untraceElement = elementInRoom;
+                for (int j = 0; j < 3; j++)
                 {
-                    Element closestElement = GetClosestElements(room, elementInRoom, firstElement);
-                    firstElement = closestElement;
-                    removeList.Add(firstElement); 
-                }               
+
+                }
             }
             return listOfTracingElements;
+        }
+
+        private List<Element> Find4Neibor(Room room, List<Element> elementInRoom, Element sourceElement)
+        {
+            List<Element> listOfNeiborElements = new();
+            List<Element> sourceList = listOfNeiborElements;
+            sourceList.Remove(sourceElement);
+            int neiborsCount = 4;
+            if (elementInRoom.Count < 4)
+            {
+                neiborsCount = elementInRoom.Count;
+            }
+            int i = 0;
+            while (i < neiborsCount)
+            {
+                Element neibor = GetClosestElement(sourceList, sourceElement);
+                listOfNeiborElements.Add(neibor);
+                sourceList.Remove(neibor);
+            }
+            return listOfNeiborElements;
+        }
+
+        private List<Element> GetClearNeiborList(List<Element> listOfNeiborElements, Element sourceElement)
+        {
+            List<Element> removeList = new();
+            for (int i = 0; i < listOfNeiborElements.Count-1; i++)
+            {
+                for (int j = i + 1; j < listOfNeiborElements.Count; j++)
+                {
+                    if (DistanceBetweenElements(listOfNeiborElements[i], listOfNeiborElements[j]) < DistanceBetweenElements(sourceElement, listOfNeiborElements[j]))
+                    {
+                        removeList.Add(listOfNeiborElements[j]);
+                    }
+                }
+            }
+            List<Element> clearNeiborList = RemoveElement(listOfNeiborElements, removeList)
+            return clearNeiborList;
         }
 
         private List<Element> RemoveElement(List<Element> sourceList, List<Element> removeList)
@@ -42,7 +79,7 @@ namespace Semi_automatic_trace.Services
             }
             return sourceList;
         }
-        private Element GetClosestElements(Room room, List<Element> elementInRoom, Element sourceElement)
+        private Element GetClosestElement(List<Element> elementInRoom, Element sourceElement)
         {
             Element closestElement = null;            
             double minDistance = double.MaxValue;
