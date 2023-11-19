@@ -23,9 +23,12 @@ namespace Semi_automatic_trace.ViewModels
 
         public Element Reference { get; set; }
 
+        public Element ReferenceRoom { get; set; }
+
         public List<object> Vertex { get; set; } 
 
         public BidirectionalGraph<object, IEdge<object>> Graph { get; set; }
+
 
         private RelayCommand selectTrace; 
         public RelayCommand SelectTrace
@@ -51,6 +54,35 @@ namespace Semi_automatic_trace.ViewModels
             }
         }
 
+        private RelayCommand selectRoom;
+        public RelayCommand SelectRoom
+        {
+            get
+            {
+                return selectRoom ??
+                    (selectRoom = new RelayCommand(obj =>
+                    {
+                        if (!(obj is Window window))
+                            return;
+
+                        window.Hide();
+                        try
+                        {
+                            Reference = _doc.GetElement(_selectionService.PickObject(ObjectType.Element).ElementId);
+                            if (Reference is Room)
+                            {
+                                ReferenceRoom = Reference;
+                            }                            
+                        }
+                        catch (OperationCanceledException) { }
+                        window.ShowDialog();
+                    }));
+
+            }
+        }
+
+
+
         private RelayCommand getElectricalSystem;
         public RelayCommand GetElectricalSystem
         {
@@ -61,6 +93,20 @@ namespace Semi_automatic_trace.ViewModels
                     {
                         MEPElements mepElements = new();
                         var tmp = mepElements.GetAllElementOfElectricalSystem(_doc, Reference);
+                    }));
+            }
+        }
+
+        private RelayCommand trace;
+        public RelayCommand Trace
+        {
+            get
+            {
+                return trace ??
+                    (trace = new RelayCommand(obj =>
+                    {
+                        Tracing tracing = new Tracing();
+                        tracing.TraceRoom(ReferenceRoom as Room);
                     }));
             }
         }

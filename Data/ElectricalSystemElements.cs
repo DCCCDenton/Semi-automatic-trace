@@ -10,9 +10,9 @@ namespace Semi_automatic_trace.Data
 {
     internal class ElectricalSystemElements
     {
-        public List<Element> FeedElectricalElements { get; set; } = new();
-        public List<Element> PowerSupplyElectricalElements { get; set; } = new();    
+        public List<ElectricalElement> FeedElectricalElements { get; set; } = new();
+        public List<ElectricalElement> PowerSupplyElectricalElements { get; set; } = new();    
 
-        public Element Panel { get; set; }
+        public ElectricalElement Panel { get; set; }
     }
 }

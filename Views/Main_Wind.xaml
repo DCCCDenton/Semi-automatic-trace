@@ -10,7 +10,7 @@
              mc:Ignorable="d"             
              d:DesignHeight="450" Width="833">
 
-    <Grid Margin="0,0,352,0">
+    <Grid Margin="0,0,144,-164">
         <!--<zoom:ZoomControl Margin="0,53,0,24" HorizontalAlignment="Left" Width="802">
             <graphsharp:GraphLayout 
                 
@@ -23,9 +23,9 @@
         </zoom:ZoomControl>-->
         <Button Command="{Binding BGraph}" 
                 Content="Граф" 
-                Margin="0,445,0,-51" 
+                Margin="190,445,0,-51" 
                 Height="40" 
-                HorizontalAlignment="Center" Width="132"/>
+                HorizontalAlignment="Left" Width="132"/>
         <Button Command="{Binding SelectTrace}" 
                 CommandParameter="{Binding ElementName=mainWindow}"
                 Content="Выбрать трассу" 
@@ -41,6 +41,22 @@
             Margin="347,445,0,-51" 
             Height="40" 
             HorizontalAlignment="Left" Width="132"/>
+        <Button Command="{Binding GetElectricalSystem}" 
+            Content="MEP" 
+            Margin="347,445,0,-51" 
+            Height="40" 
+            HorizontalAlignment="Left" Width="132"/>
+        <Button Command="{Binding SelectRoom}" 
+            CommandParameter="{Binding ElementName=mainWindow}"
+            Content="SelectRoom" 
+            Margin="509,480,0,78" 
+            Height="40" 
+            HorizontalAlignment="Left" Width="132"/>
+        <Button Command="{Binding Trace}" 
+            Content="TraceRoom" 
+            Margin="509,545,0,0" 
+            Height="40" 
+            HorizontalAlignment="Left" Width="132" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
 
     </Grid>
 </Window>

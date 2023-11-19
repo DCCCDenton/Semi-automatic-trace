@@ -120,10 +120,10 @@ namespace Semi_automatic_trace
                 ISet<ElectricalSystem> electricalSystems = panelInstance.MEPModel.GetElectricalSystems();
                 foreach (ElectricalSystem electricalSystem in electricalSystems)
                 {
-                    ElectricalSystemElements electricalSystemElements = new () { Panel = element};
+                    ElectricalSystemElements electricalSystemElements = new() { Panel = new ElectricalElement() { MainElement = element } };
                     foreach (Element elm in electricalSystem.Elements)
                     {
-                        electricalSystemElements.FeedElectricalElements.Add(elm);   
+                        electricalSystemElements.FeedElectricalElements.Add(new ElectricalElement() { MainElement = elm });   
                     }
                     listOfElementOfElectricalSystem.Add(electricalSystemElements);  
                 }
