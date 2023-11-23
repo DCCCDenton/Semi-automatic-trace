@@ -10,7 +10,7 @@ namespace Semi_automatic_trace.Data
     internal class ElectricalElement
     {
         public Element MainElement { get; set; }
-        public List<ElectricalElement> IncomingElement { get; set; }
-        public List<ElectricalElement> OutElements { get; set; }  = new List<ElectricalElement>();
+        public List<ElectricalElement> IncomingElement { get; set; } = new();
+        public List<ElectricalElement> OutElements { get; set; }  = new ();
     }
 }

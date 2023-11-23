@@ -13,77 +13,113 @@ namespace Semi_automatic_trace.Services
     internal class Tracing
     {
 
-        public List<ElectricalElement> TraceRoom(Room room)
+        public List<ElectricalElement> TraceRoom(Document doc, Room room)
         {
-            List<ElectricalElement> listOfTracingElements = new();
+            MEPElements mepElements = new();
+            List<ElectricalElement>  listOfTracingElements = new();
+            List<ElectricalSystemElements> allElectricalElements = mepElements.GetAllElementOfElectricalSystem(doc, room);
             ElectricalSystemElements electricalSystemElements = new();
-            List<ElectricalElement> elementsInRoom = electricalSystemElements.FeedElectricalElements.Where(e => (e.MainElement as FamilyInstance).Room.Id == room.Id).ToList();
-            ElectricalElement firstElement = GetClosestElement(elementsInRoom, electricalSystemElements.Panel);
-            elementsInRoom.Remove(firstElement);            
-            listOfTracingElements.Add(firstElement);
-            int i = 1;
-            while (i < elementsInRoom.Count)
+            List<ElectricalElement> elementsInRoom = new();
+            foreach (ElectricalSystemElements systemElement in allElectricalElements)
             {
-                int j = 0;
-                List<ElectricalElement> localTracingElements = new();
-                while (j < 3)
+                elementsInRoom = systemElement.FeedElectricalElements.Where(e => (e.MainElement as FamilyInstance).Room.Id == room.Id).ToList();
+                if (elementsInRoom.Count > 0)
                 {
-                    ElectricalElement closesElement = GetClosestElement(elementsInRoom, elementsInRoom[i]);
-                    localTracingElements.Add(closesElement);
-                    j++;
+                    break;
                 }
-                List<ElectricalElement> clearNeibor = GetClearNeiborList(localTracingElements, firstElement);
-
-                elementsInRoom.Except(clearNeibor);
-                firstElement = elementsInRoom.First();
-                i++;               
             }
-            return listOfTracingElements;
+            ElectricalElement firstElement = GetClosestElement(elementsInRoom, allElectricalElements.First().Panel);
+            firstElement.IncomingElement.Add(allElectricalElements.First().Panel);
+
+            GetNeibors(firstElement, elementsInRoom);
+            foreach (ElectricalElement electricalElement in elementsInRoom)
+            {
+                if (electricalElement.IncomingElement.Count > 0 && electricalElement.OutElements.Count == 0)
+                {
+                    GetNeibors(electricalElement, elementsInRoom);
+                }
+                
+            }          
+            return elementsInRoom;
         }
 
-        private List<ElectricalElement> Find4Neibor(Room room, List<ElectricalElement> elementInRoom, ElectricalElement sourceElement)
+        private void GetNeibors(ElectricalElement electricalElement, List<ElectricalElement> elementsInRoom)
         {
-            List<ElectricalElement> listOfNeiborElements = new();
-            List<ElectricalElement> sourceList = listOfNeiborElements;
-            sourceList.Remove(sourceElement);
-            int neiborsCount = 4;
-            if (elementInRoom.Count < 4)
+            List<ElectricalElement> tmpNeibor = new();
+            int i = 0; 
+            while (i < 3)
             {
-                neiborsCount = elementInRoom.Count;
+                ElectricalElement neiborElement = GetClosestElement(elementsInRoom, electricalElement);
+                if (neiborElement != null)
+                {
+                    if (tmpNeibor.Count == 0)
+                    {
+                        electricalElement.OutElements.Add(neiborElement);
+                        neiborElement.IncomingElement.Add(electricalElement);
+                        tmpNeibor.Add(neiborElement);
+                    }
+                    else
+                    {
+                        if (GetClearNeibor(tmpNeibor, neiborElement))
+                        {
+                            electricalElement.OutElements.Add(neiborElement);
+                            neiborElement.IncomingElement.Add(electricalElement);
+                            tmpNeibor.Add(neiborElement);
+                        }
+                    }                   
+                }
+                i++;
             }
-            int i = 0;
-            while (i < neiborsCount)
-            {
-                ElectricalElement neibor = GetClosestElement(sourceList, sourceElement);
-                listOfNeiborElements.Add(neibor);
-                sourceList.Remove(neibor);
-            }
-            return listOfNeiborElements;
         }
 
-        private List<ElectricalElement> GetClearNeiborList(List<ElectricalElement> listOfNeiborElements, ElectricalElement sourceElement)
-        {
-            List<ElectricalElement> removeList = new();
 
-            for (int i = 0; i < listOfNeiborElements.Count-1; i++)
+
+        //private List<ElectricalElement> Find4Neibor(Room room, List<ElectricalElement> elementInRoom, ElectricalElement sourceElement)
+        //{
+        //    List<ElectricalElement> listOfNeiborElements = new();
+        //    List<ElectricalElement> sourceList = listOfNeiborElements;
+        //    sourceList.Remove(sourceElement);
+        //    int neiborsCount = 4;
+        //    if (elementInRoom.Count < 4)
+        //    {
+        //        neiborsCount = elementInRoom.Count;
+        //    }
+        //    int i = 0;
+        //    while (i < neiborsCount)
+        //    {
+        //        ElectricalElement neibor = GetClosestElement(sourceList, sourceElement);
+        //        listOfNeiborElements.Add(neibor);
+        //        sourceList.Remove(neibor);
+        //    }
+        //    return listOfNeiborElements;
+        //}
+
+        private bool GetClearNeibor(List<ElectricalElement> listOfNeiborElements, ElectricalElement sourceElement)
+        {
+            bool clearNeibor = true;
+            for (int i = 0; i < listOfNeiborElements.Count - 1; i++)
             {
+                if (listOfNeiborElements.Count < 2)
+                {
+                    if (listOfNeiborElements[i].IncomingElement.Count > 0)
+                    {
+                        clearNeibor = false;
+                        break;
+                    }
+                }
                 for (int j = i + 1; j < listOfNeiborElements.Count; j++)
                 {
-                    if (DistanceBetweenElements(listOfNeiborElements[i], listOfNeiborElements[j]) < DistanceBetweenElements(sourceElement, listOfNeiborElements[i]))
+                    double dist1 = DistanceBetweenElements(listOfNeiborElements[i], listOfNeiborElements[j]);
+                    double dist2 = DistanceBetweenElements(sourceElement, listOfNeiborElements[i]);
+
+                    if (dist1 < dist2 || listOfNeiborElements[i].IncomingElement.Count > 0)
                     {
-                        if (DistanceBetweenElements(sourceElement, listOfNeiborElements[i]) > DistanceBetweenElements(sourceElement, listOfNeiborElements[j]))
-                        {
-                            removeList.Add(listOfNeiborElements[i]);
-                        }
-                        else
-                        {
-                            removeList.Add(listOfNeiborElements[j]);
-                        }                        
+                        clearNeibor = false;
+                        break;
                     }
                 }
             }
-            List<ElectricalElement> clearNeiborList = listOfNeiborElements.Except(removeList).ToList();
-            return clearNeiborList;
+            return clearNeibor;
         }
 
         private ElectricalElement GetClosestElement(List<ElectricalElement> listOfTracingElements, ElectricalElement sourceElement)
@@ -92,12 +128,15 @@ namespace Semi_automatic_trace.Services
             double minDistance = double.MaxValue;
             foreach (ElectricalElement element in listOfTracingElements)
             {
-                double distance = DistanceBetweenElements(sourceElement, element);
-                if (distance < minDistance)
+                if (sourceElement.MainElement.Id.IntegerValue != element.MainElement.Id.IntegerValue)
                 {
-                    minDistance = distance;
-                    closestElement = element;
-                }
+                    double distance = DistanceBetweenElements(sourceElement, element);
+                    if (distance < minDistance && element.IncomingElement.Count == 0 && element.OutElements.Count == 0)
+                    {
+                        minDistance = distance;
+                        closestElement = element;
+                    }
+                }               
             }
             return closestElement;
         }

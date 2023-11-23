@@ -83,19 +83,19 @@ namespace Semi_automatic_trace.ViewModels
 
 
 
-        private RelayCommand getElectricalSystem;
-        public RelayCommand GetElectricalSystem
-        {
-            get
-            {
-                return getElectricalSystem ??
-                    (getElectricalSystem = new RelayCommand(obj =>
-                    {
-                        MEPElements mepElements = new();
-                        var tmp = mepElements.GetAllElementOfElectricalSystem(_doc, Reference);
-                    }));
-            }
-        }
+        //private RelayCommand getElectricalSystem;
+        //public RelayCommand GetElectricalSystem
+        //{
+        //    get
+        //    {
+        //        return getElectricalSystem ??
+        //            (getElectricalSystem = new RelayCommand(obj =>
+        //            {
+        //                MEPElements mepElements = new();
+        //                var tmp = mepElements.GetAllElementOfElectricalSystem(_doc, Reference);
+        //            }));
+        //    }
+        //}
 
         private RelayCommand trace;
         public RelayCommand Trace
@@ -106,7 +106,7 @@ namespace Semi_automatic_trace.ViewModels
                     (trace = new RelayCommand(obj =>
                     {
                         Tracing tracing = new Tracing();
-                        tracing.TraceRoom(ReferenceRoom as Room);
+                        tracing.TraceRoom(_doc, ReferenceRoom as Room);
                     }));
             }
         }

@@ -89,6 +89,7 @@
     <Compile Include="Main Class.cs" />
     <Compile Include="Services\RelayCommand.cs" />
     <Compile Include="Services\Tracing.cs" />
+    <Compile Include="Services\Visualise.cs" />
     <Compile Include="ViewModels\SATViewModel.cs" />
     <Compile Include="Views\Main_Wind.xaml.cs">
       <DependentUpon>Main_Wind.xaml</DependentUpon>

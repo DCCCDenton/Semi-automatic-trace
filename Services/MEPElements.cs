@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.DB.Electrical;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
@@ -111,24 +112,52 @@ namespace Semi_automatic_trace
             return vertex_list;
         }
 
-        public List<ElectricalSystemElements> GetAllElementOfElectricalSystem(Document doc, Element element)
+        public List<ElectricalSystemElements> GetAllElementOfElectricalSystem(Document doc, Room room)
         {
+            List<Element> allElectricalElemtnsInRoom = ElementsInRoom(doc, room, new List<BuiltInCategory> { BuiltInCategory.OST_ElectricalFixtures });
             List<ElectricalSystemElements> listOfElementOfElectricalSystem = new();
-            if (element.Category.BuiltInCategory == BuiltInCategory.OST_ElectricalEquipment)
+            ElementId panelId = null;
+            foreach (Element element in allElectricalElemtnsInRoom)
             {
-                FamilyInstance panelInstance = element as FamilyInstance;
-                ISet<ElectricalSystem> electricalSystems = panelInstance.MEPModel.GetElectricalSystems();
-                foreach (ElectricalSystem electricalSystem in electricalSystems)
+                FamilyInstance elementInstance = element as FamilyInstance;
+                FamilyInstance panelInstance = null;
+                try
                 {
-                    ElectricalSystemElements electricalSystemElements = new() { Panel = new ElectricalElement() { MainElement = element } };
-                    foreach (Element elm in electricalSystem.Elements)
-                    {
-                        electricalSystemElements.FeedElectricalElements.Add(new ElectricalElement() { MainElement = elm });   
-                    }
-                    listOfElementOfElectricalSystem.Add(electricalSystemElements);  
+                    panelInstance = elementInstance.MEPModel.GetElectricalSystems().First()?.BaseEquipment;
                 }
-            }
+                catch { }
+                if (panelInstance != null && panelInstance.Id != panelId )
+                {
+                    ISet<ElectricalSystem> electricalSystems = panelInstance.MEPModel.GetElectricalSystems();
+                    foreach (ElectricalSystem electricalSystem in electricalSystems)
+                    {
+                        ElectricalSystemElements electricalSystemElements = new() { Panel = new ElectricalElement() { MainElement = element } };
+                        foreach (Element elm in electricalSystem.Elements)
+                        {
+                            electricalSystemElements.FeedElectricalElements.Add(new ElectricalElement() { MainElement = elm });
+                        }
+                        listOfElementOfElectricalSystem.Add(electricalSystemElements);
+                    }
+                    panelId = panelInstance.Id;
+                }
+            }           
             return listOfElementOfElectricalSystem;
+        }
+
+        public List<Element> ElementsInRoom(Document doc, Room room, List<BuiltInCategory> categories)
+        {
+            List<Element> elmInRoom = new List<Element>();
+            if (room != null)
+            {
+                XYZ roomMin = room.get_BoundingBox(null).Min;
+                XYZ roomMax = room.get_BoundingBox(null).Max;
+                XYZ roomExtMin = new XYZ(roomMin.X - 0.3, roomMin.Y - 0.3, roomMin.Z - 0.3);
+                XYZ roomExtMax = new XYZ(roomMax.X + 0.3, roomMax.Y + 0.3, roomMax.Z + 0.3);
+                BoundingBoxIntersectsFilter RoomBoxFilter = new BoundingBoxIntersectsFilter(new Outline(roomExtMin, roomExtMax));
+                ElementMulticategoryFilter mutliCat = new ElementMulticategoryFilter(categories);
+                elmInRoom = new FilteredElementCollector(doc).WherePasses(RoomBoxFilter).WherePasses(mutliCat).ToList();
+            }
+            return elmInRoom;
         }
     }
 }
