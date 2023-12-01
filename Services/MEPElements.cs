@@ -114,7 +114,7 @@ namespace Semi_automatic_trace
 
         public List<ElectricalSystemElements> GetAllElementOfElectricalSystem(Document doc, Room room)
         {
-            List<Element> allElectricalElemtnsInRoom = ElementsInRoom(doc, room, new List<BuiltInCategory> { BuiltInCategory.OST_ElectricalFixtures });
+            List<Element> allElectricalElemtnsInRoom = ElementsInRoom(doc, room, new List<BuiltInCategory> { BuiltInCategory.OST_LightingFixtures });
             List<ElectricalSystemElements> listOfElementOfElectricalSystem = new();
             ElementId panelId = null;
             foreach (Element element in allElectricalElemtnsInRoom)

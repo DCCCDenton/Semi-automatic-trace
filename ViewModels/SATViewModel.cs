@@ -3,6 +3,7 @@ using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Selection;
 using QuickGraph;
+using Semi_automatic_trace.Data;
 using Semi_automatic_trace.Services;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,8 @@ namespace Semi_automatic_trace.ViewModels
         public List<object> Vertex { get; set; } 
 
         public BidirectionalGraph<object, IEdge<object>> Graph { get; set; }
+
+        private List<ElectricalElement> ElementInRoom {  get; set; }
 
 
         private RelayCommand selectTrace; 
@@ -81,6 +84,21 @@ namespace Semi_automatic_trace.ViewModels
             }
         }
 
+        private RelayCommand visualise;
+        public RelayCommand Visualise
+        {
+            get
+            {
+                return visualise ??
+                    (visualise = new RelayCommand(obj =>
+                    {
+                        Visualise visualise = new();
+                        visualise.VisualTraces(_doc, ElementInRoom);
+                    }));
+
+            }
+        }
+
 
 
         //private RelayCommand getElectricalSystem;
@@ -106,7 +124,7 @@ namespace Semi_automatic_trace.ViewModels
                     (trace = new RelayCommand(obj =>
                     {
                         Tracing tracing = new Tracing();
-                        tracing.TraceRoom(_doc, ReferenceRoom as Room);
+                        ElementInRoom = tracing.TraceRoom(_doc, ReferenceRoom as Room);
                     }));
             }
         }

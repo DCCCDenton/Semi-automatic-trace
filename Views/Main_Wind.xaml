@@ -10,7 +10,7 @@
              mc:Ignorable="d"             
              d:DesignHeight="450" Width="833">
 
-    <Grid Margin="0,0,144,-164">
+    <Grid Margin="0,0,10,-164">
         <!--<zoom:ZoomControl Margin="0,53,0,24" HorizontalAlignment="Left" Width="802">
             <graphsharp:GraphLayout 
                 
@@ -32,10 +32,6 @@
                 Margin="51,445,0,-51" 
                 Height="40" 
                 HorizontalAlignment="Left"/>
-        <ListBox 
-            ItemsSource="{Binding Vertex}"
-            x:Name="Vertex"
-            Margin="491,-4,-346,4"/>
         <Button Command="{Binding GetElectricalSystem}" 
             Content="MEP" 
             Margin="347,445,0,-51" 
@@ -55,6 +51,11 @@
         <Button Command="{Binding Trace}" 
             Content="TraceRoom" 
             Margin="509,545,0,0" 
+            Height="40" 
+            HorizontalAlignment="Left" Width="132" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
+        <Button Command="{Binding Visualise}" 
+            Content="Visualize" 
+            Margin="666,507,0,0" 
             Height="40" 
             HorizontalAlignment="Left" Width="132" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
 
