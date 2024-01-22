@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Semi_automatic_trace.Data
 {
-    internal class ElectricalSystemElements
+    public class ElectricalSystemElements
     {
         public List<ElectricalElement> FeedElectricalElements { get; set; } = new();
         public List<ElectricalElement> PowerSupplyElectricalElements { get; set; } = new();    

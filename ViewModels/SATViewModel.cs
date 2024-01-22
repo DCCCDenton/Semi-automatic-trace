@@ -31,6 +31,7 @@ namespace Semi_automatic_trace.ViewModels
         public BidirectionalGraph<object, IEdge<object>> Graph { get; set; }
 
         private List<ElectricalElement> ElementInRoom {  get; set; }
+        private List<ElectricalSystemElements> TracingPanel { get; set; }   
 
 
         private RelayCommand selectTrace; 
@@ -75,7 +76,7 @@ namespace Semi_automatic_trace.ViewModels
                             if (Reference is Room)
                             {
                                 ReferenceRoom = Reference;
-                            }                            
+                            }  
                         }
                         catch (OperationCanceledException) { }
                         window.ShowDialog();
@@ -94,6 +95,21 @@ namespace Semi_automatic_trace.ViewModels
                     {
                         Visualise visualise = new();
                         visualise.VisualTraces(_doc, ElementInRoom);
+                    }));
+
+            }
+        }
+
+        private RelayCommand visualise2;
+        public RelayCommand Visualise2
+        {
+            get
+            {
+                return visualise2 ??
+                    (visualise2 = new RelayCommand(obj =>
+                    {
+                        Visualise visualise = new();
+                        visualise.VisualTraces2(_doc, TracingPanel);
                     }));
 
             }
@@ -125,6 +141,20 @@ namespace Semi_automatic_trace.ViewModels
                     {
                         Tracing tracing = new Tracing();
                         ElementInRoom = tracing.TraceRoom(_doc, ReferenceRoom as Room);
+                    }));
+            }
+        }
+
+        private RelayCommand traceWithoutRoom;
+        public RelayCommand TraceWithoutRoom
+        {
+            get
+            {
+                return traceWithoutRoom ??
+                    (traceWithoutRoom = new RelayCommand(obj =>
+                    {
+                        Tracing tracing = new Tracing();
+                        TracingPanel = tracing.TracePanel(_doc, Reference);
                     }));
             }
         }

@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
+using Autodesk.Revit.DB.Electrical;
 using Semi_automatic_trace.Data;
 using System;
 using System.Collections.Generic;
@@ -18,9 +19,9 @@ namespace Semi_automatic_trace.Services
         {
             MEPElements mepElements = new();
             List<ElectricalElement>  listOfTracingElements = new();
-            List<ElectricalSystemElements> allElectricalElements = mepElements.GetAllElementOfElectricalSystem(doc, room);
             ElectricalSystemElements electricalSystemElements = new();
-            List<ElectricalElement> elementsInRoom = new();
+            List<ElectricalElement> elementsInRoom = SelectInRoom(doc,room);
+            List<ElectricalSystemElements> allElectricalElements = mepElements.GetAllElementOfElectricalSystem(doc, room);
             foreach (ElectricalSystemElements systemElement in allElectricalElements)
             {
                 elementsInRoom = systemElement.FeedElectricalElements.Where(e => (e.MainElement as FamilyInstance).Room.Id == room.Id).ToList();
@@ -32,11 +33,7 @@ namespace Semi_automatic_trace.Services
             Element panelElement = (elementsInRoom.First().MainElement as FamilyInstance).MEPModel.GetElectricalSystems().First().BaseEquipment;
             ElectricalElement panel = new() { MainElement = panelElement };
             ElectricalElement firstElement = GetClosestElement(elementsInRoom, panel);
-
-            //firstElement.IncomingElement.Add(allElectricalElements.First().Panel);
-
             GetNeibors(firstElement, elementsInRoom);
-            bool completeRoom = false;
             foreach (ElectricalElement electricalElement in elementsInRoom)
             {
                 if (electricalElement.IncomingElement.Count > 0 && electricalElement.OutElements.Count == 0)
@@ -58,7 +55,75 @@ namespace Semi_automatic_trace.Services
                     }
                 }
             }
-            var tmp = elementsInRoom;
+            return elementsInRoom;
+        }
+
+        public List<ElectricalSystemElements> TracePanel(Document doc, Element panel)
+        {
+            List<ElectricalSystemElements> panelSystems = new();
+            if (panel.Category.BuiltInCategory == BuiltInCategory.OST_ElectricalEquipment)
+            {
+                panelSystems = GetPanelElectricalSystem(panel);
+                foreach (ElectricalSystemElements electricalSystemElements in panelSystems)
+                {
+                    ElectricalElement firstElement = GetClosestElement(electricalSystemElements.FeedElectricalElements, electricalSystemElements.Panel);
+                    GetNeibors(firstElement, electricalSystemElements.FeedElectricalElements);
+                    foreach (ElectricalElement electricalElement in electricalSystemElements.FeedElectricalElements)
+                    {
+                        if (electricalElement.IncomingElement.Count > 0 && electricalElement.OutElements.Count == 0)
+                        {
+                            GetNeibors(electricalElement, electricalSystemElements.FeedElectricalElements);
+                        }
+                    }
+                    int i = electricalSystemElements.FeedElectricalElements.Where(x => x.IncomingElement.Count == 0).Count();
+                    DeleteDublicates(electricalSystemElements.FeedElectricalElements);
+                    if (i > 0)
+                    {
+                        foreach (ElectricalElement electricalElement in electricalSystemElements.FeedElectricalElements)
+                        {
+                            if (electricalElement.IncomingElement.Count == 0)
+                            {
+                                ElectricalElement electricalElement1 = GetClosestElement(electricalSystemElements.FeedElectricalElements, electricalElement);
+                                electricalElement1.OutElements.Add(electricalElement);
+                                electricalElement.IncomingElement.Add(electricalElement1);
+                            }
+                        }
+                    }
+                }
+            }
+            return panelSystems;
+        }
+
+        private List<ElectricalSystemElements> GetPanelElectricalSystem(Element panel)
+        {
+            List<ElectricalSystemElements> panelSystems = new();
+            var eSystems = (panel as FamilyInstance).MEPModel.GetElectricalSystems();
+            foreach (ElectricalSystem eSystem in eSystems)
+            {
+                ElectricalSystemElements electricalSystemElements = new() { Panel = new ElectricalElement() { MainElement = panel } };
+                foreach (Element element in eSystem.Elements)
+                {
+                    ElectricalElement electricalElement = new() { MainElement = element };
+                    electricalSystemElements.FeedElectricalElements.Add(electricalElement);
+                }
+                panelSystems.Add(electricalSystemElements);
+            }
+            return panelSystems;
+        }
+
+        private List<ElectricalElement> SelectInRoom(Document doc, Room room)
+        {
+            MEPElements mepElements = new();
+            List<ElectricalElement> elementsInRoom = new();
+            List<ElectricalSystemElements> allElectricalElements = mepElements.GetAllElementOfElectricalSystem(doc, room);
+            foreach (ElectricalSystemElements systemElement in allElectricalElements)
+            {
+                elementsInRoom = systemElement.FeedElectricalElements.Where(e => (e.MainElement as FamilyInstance).Room.Id == room.Id).ToList();
+                if (elementsInRoom.Count > 0)
+                {
+                    break;
+                }
+            }
             return elementsInRoom;
         }
 
@@ -95,14 +160,6 @@ namespace Semi_automatic_trace.Services
             }
         }
 
-        private void ClearTrace(List<ElectricalElement> elementsInRoom)
-        {
-            
-            foreach (ElectricalElement electricalElement in elementsInRoom)
-            {
-                          
-            }
-        }
 
         private void GetNeibors(ElectricalElement electricalElement, List<ElectricalElement> elementsInRoom)
         {

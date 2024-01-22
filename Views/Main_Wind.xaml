@@ -21,27 +21,12 @@
                 HorizontalAlignment="Left" 
                 Width="526" />
         </zoom:ZoomControl>-->
-        <Button Command="{Binding BGraph}" 
-                Content="Граф" 
-                Margin="190,445,0,-51" 
-                Height="40" 
-                HorizontalAlignment="Left" Width="132"/>
         <Button Command="{Binding SelectTrace}" 
                 CommandParameter="{Binding ElementName=mainWindow}"
                 Content="Выбрать трассу" 
-                Margin="51,445,0,-51" 
+                Margin="86,480,0,78" 
                 Height="40" 
-                HorizontalAlignment="Left"/>
-        <Button Command="{Binding GetElectricalSystem}" 
-            Content="MEP" 
-            Margin="347,445,0,-51" 
-            Height="40" 
-            HorizontalAlignment="Left" Width="132"/>
-        <Button Command="{Binding GetElectricalSystem}" 
-            Content="MEP" 
-            Margin="347,445,0,-51" 
-            Height="40" 
-            HorizontalAlignment="Left" Width="132"/>
+                HorizontalAlignment="Left" Width="132"/>
         <Button Command="{Binding SelectRoom}" 
             CommandParameter="{Binding ElementName=mainWindow}"
             Content="SelectRoom" 
@@ -58,6 +43,16 @@
             Margin="666,507,0,0" 
             Height="40" 
             HorizontalAlignment="Left" Width="132" VerticalAlignment="Top" d:LayoutOverrides="Height"/>
+        <Button Command="{Binding TraceWithoutRoom}" 
+            Content="TracePanel" 
+            Margin="86,545,0,0" 
+            Height="40" 
+            HorizontalAlignment="Left" Width="132" VerticalAlignment="Top" d:LayoutOverrides="HorizontalAlignment, Height"/>
+        <Button Command="{Binding Visualise2}" 
+            Content="VisualizePanel" 
+            Margin="261,507,0,0" 
+            Height="40" 
+            HorizontalAlignment="Left" Width="132" VerticalAlignment="Top" d:LayoutOverrides="HorizontalAlignment, Height"/>
 
     </Grid>
 </Window>
